@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatBlocker", "ChatBlocker\ChatBlocker.csproj", "{CE888449-0653-4F56-B036-57A84FDEFDC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousingDistricts", "HousingDistricts\HousingDistricts.csproj", "{FFD1ADB9-EA99-4395-A667-48757F002013}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TShockPluginTemplate", "TShockPluginTemplate\TShockPluginTemplate.csproj", "{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Public|Any CPU = Public|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE888449-0653-4F56-B036-57A84FDEFDC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE888449-0653-4F56-B036-57A84FDEFDC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE888449-0653-4F56-B036-57A84FDEFDC7}.Public|Any CPU.ActiveCfg = Public|Any CPU
+		{CE888449-0653-4F56-B036-57A84FDEFDC7}.Public|Any CPU.Build.0 = Public|Any CPU
+		{FFD1ADB9-EA99-4395-A667-48757F002013}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD1ADB9-EA99-4395-A667-48757F002013}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD1ADB9-EA99-4395-A667-48757F002013}.Public|Any CPU.ActiveCfg = Public|Any CPU
+		{FFD1ADB9-EA99-4395-A667-48757F002013}.Public|Any CPU.Build.0 = Public|Any CPU
+		{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}.Public|Any CPU.ActiveCfg = Public|Any CPU
+		{85F20ADC-C2D1-416D-B7FF-9433C75A8F01}.Public|Any CPU.Build.0 = Public|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
