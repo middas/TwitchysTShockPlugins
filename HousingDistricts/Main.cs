@@ -70,7 +70,6 @@ namespace HousingDistricts
             HConfig = new HConfigFile();
             Order = -1;
         }
-
         public void OnInitialize()
         {
             SQLEditor = new SqlTableEditor(TShock.DB, TShock.DB.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
@@ -153,7 +152,6 @@ namespace HousingDistricts
             Commands.ChatCommands.Add(new Command(HCommands.TellAll, "all"));
             #endregion
         }
-
         public void OnUpdate()
         {
             lock (HPlayers)
@@ -216,7 +214,6 @@ namespace HousingDistricts
                 }
             }
         }
-
         public void OnChat(messageBuffer msg, int ply, string text, HandledEventArgs e)
         {
             if (text[0] == '/')
@@ -233,13 +230,11 @@ namespace HousingDistricts
                 }
             }
         }
-
         public void OnGreetPlayer(int who, HandledEventArgs e)
         {
             lock (HPlayers)
                 HPlayers.Add(new HPlayer(who, new Vector2(TShock.Players[who].TileX, TShock.Players[who].TileY)));
         }
-
         public void OnLeave(int ply)
         {
             lock (HPlayers)
@@ -254,7 +249,6 @@ namespace HousingDistricts
                 }
             }
         }
-
         private void GetData(GetDataEventArgs e)
         {
             PacketTypes type = e.MsgID;
