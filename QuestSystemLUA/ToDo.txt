@@ -1,0 +1,6 @@
+﻿Server EPR Rewards
+Starting Quests From a Quest - Done
+Fix Give - Done
+KillNPC - Done
+Add amount parameter to Kill - Done
+Read Chat - Done

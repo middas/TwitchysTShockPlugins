@@ -25,25 +25,28 @@ namespace QuestSystemLUA
         public string CurQuestRegion { get; set; }
         public bool InHouse { get; set; }
         public bool AwaitingQRName = false;
+        public bool AwaitingChat = false;
+        public bool HideChat = false;
+        public string LastChatMessage = "";
+        public List<RunQuestParameters> RunningQuestThreads = new List<RunQuestParameters>();
 
         public QPlayer(int index)
         {
             Index = index;
         }
-
-        public bool NewQuest(Quest q)
+        public bool NewQuest(Quest q, bool skipchecks = false)
         {
-            if (!this.RunningQuests.Contains(q.Name))
+            if (skipchecks || !this.RunningQuests.Contains(q.Name))
             {
-                object parameters = new RunQuestParameters(q, this);
                 Thread t = new Thread(QTools.RunQuest);
+                object parameters = new RunQuestParameters(q, this, t);
                 t.Start(parameters);
+                RunningQuestThreads.Add((RunQuestParameters)parameters);
                 return true;
             }
             return false;
         }
     }
-
     public class Quest
     {
         public string Name;
@@ -51,8 +54,9 @@ namespace QuestSystemLUA
         public int MinQuestsNeeded;
         public int MaxAttemps;
         public int AmountOfPlayersAtATime;
+        public bool EndOnPlayerDeath;
 
-        public Quest(string name, string filepath, int min, int max, int players)
+        public Quest(string name, string filepath, int min, int max, int players, bool endondeath)
         {
             Name = name;
             FilePath = filepath;
@@ -61,19 +65,19 @@ namespace QuestSystemLUA
             AmountOfPlayersAtATime = players;
         }
     }
-
     public class RunQuestParameters
     {
         public Quest Quest;
         public QPlayer Player;
+        public Thread QThread;
 
-        public RunQuestParameters(Quest quest, QPlayer player)
+        public RunQuestParameters(Quest quest, QPlayer player, Thread thread)
         {
             Quest = quest;
             Player = player;
+            QThread = thread;
         }
     }
-
     public class AwaitingItem
     {
         public string QuestName;
@@ -87,7 +91,6 @@ namespace QuestSystemLUA
             AwaitingItemName = name;
         }
     }
-
     public class QuestRegion : Region
     {
         public string MessageOnEntry;
@@ -103,7 +106,6 @@ namespace QuestSystemLUA
             MessageOnExit = exit;
         }
     }
-
     public class StoredQPlayer
     {
         public string LoggedInName;
@@ -115,7 +117,6 @@ namespace QuestSystemLUA
             QuestPlayerData = playerdata;
         }
     }
-
     public class QuestPlayerData
     {
         public string QuestName;

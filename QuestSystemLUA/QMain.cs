@@ -48,8 +48,9 @@ namespace QuestSystemLUA
             NetHooks.GetData += GetData;
             GameHooks.Initialize += OnInitialize;
             GameHooks.Update += OnUpdate;
+            ServerHooks.Chat += OnChat;
 
-            QGetDataHandlers.InitGetDataHandler();     
+            GetDataHandlers.InitGetDataHandler();     
         }
         protected override void Dispose(bool disposing)
         {
@@ -60,20 +61,26 @@ namespace QuestSystemLUA
                 NetHooks.GetData -= GetData;
                 GameHooks.Initialize -= OnInitialize;
                 GameHooks.Update -= OnUpdate;
+                ServerHooks.Chat -= OnChat;
             }
             base.Dispose(disposing);
         }
         public void OnInitialize()
         {
+            Main.ignoreErrors = true;
+            Main.rand = new Random();
+
             SQLEditor = new SqlTableEditor(TShock.DB, TShock.DB.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
             SQLWriter = new SqlTableCreator(TShock.DB, TShock.DB.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
             Commands.ChatCommands.Add(new Command(QCommands.GetCoords, "getcoords"));
             Commands.ChatCommands.Add(new Command(QCommands.HitCoords, "hitcoords"));
-            Commands.ChatCommands.Add(new Command(QCommands.ListQuest, "listquests"));
-            Commands.ChatCommands.Add(new Command(QCommands.StartQuest, "startquest"));
-            Commands.ChatCommands.Add(new Command(QCommands.QuestRegion, "questr"));
-            Commands.ChatCommands.Add(new Command("reloadqdata", QCommands.LoadQuestData, "reloadquestdata")); 
+            Commands.ChatCommands.Add(new Command("usequest", QCommands.ListQuest, "listquests"));
+            Commands.ChatCommands.Add(new Command("usequest", QCommands.StartQuest, "startquest"));
+            Commands.ChatCommands.Add(new Command("questregion", QCommands.QuestRegion, "questr"));
+            Commands.ChatCommands.Add(new Command("reloadqdata", QCommands.LoadQuestData, "reloadquestdata"));
+            Commands.ChatCommands.Add(new Command("giveq", QCommands.GiveQuest, "giveq"));
+            Commands.ChatCommands.Add(new Command("stopquest", QCommands.StopQuest, "stopquest")); 
             
             var table = new SqlTable("QuestPlayers",
                  new SqlColumn("LogInName", MySqlDbType.Text) { Unique = true },
@@ -99,6 +106,21 @@ namespace QuestSystemLUA
             : base(game)
         {
             Order = -10;
+        }
+        public void OnChat(messageBuffer msg, int ply, string text, HandledEventArgs e)
+        {
+            if (e.Handled)
+                return;
+
+            var player = QTools.GetPlayerByID(ply);
+            if (player.AwaitingChat)
+            {
+                player.LastChatMessage = text;
+                player.AwaitingChat = false;
+
+                if (player.HideChat)
+                    e.Handled = true;
+            }            
         }
         public void OnUpdate()
         {
@@ -191,7 +213,7 @@ namespace QuestSystemLUA
             {
                 try
                 {
-                    if (QGetDataHandlers.HandlerGetData(type, player, data))
+                    if (GetDataHandlers.HandlerGetData(type, player, data))
                         e.Handled = true;
                 }
                 catch (Exception ex)

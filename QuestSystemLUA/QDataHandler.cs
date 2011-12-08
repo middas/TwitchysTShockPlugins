@@ -10,30 +10,14 @@ using System.IO.Streams;
 
 namespace QuestSystemLUA
 {
-    public delegate bool QGetDataHandlerDelegate(QGetDataHandlerArgs args);
-    public class QGetDataHandlerArgs : EventArgs
+    public delegate bool GetDataHandlerDelegate(GetDataHandlerArgs args);
+
+    public static class GetDataHandlers
     {
-        public TSPlayer Player { get; private set; }
-        public MemoryStream Data { get; private set; }
-
-        public Player TPlayer
-        {
-            get { return Player.TPlayer; }
-        }
-
-        public QGetDataHandlerArgs(TSPlayer player, MemoryStream data)
-        {
-            Player = player;
-            Data = data;
-        }
-    }
-    public static class QGetDataHandlers
-    {
-        private static Dictionary<PacketTypes, QGetDataHandlerDelegate> GetDataHandlerDelegates;
-
+        private static Dictionary<PacketTypes, GetDataHandlerDelegate> GetDataHandlerDelegates;
         public static void InitGetDataHandler()
         {
-            GetDataHandlerDelegates = new Dictionary<PacketTypes, QGetDataHandlerDelegate>
+            GetDataHandlerDelegates = new Dictionary<PacketTypes, GetDataHandlerDelegate>
             {
                 {PacketTypes.NpcStrike, OnNpcStrike},
                 {PacketTypes.Tile, HandleTile},
@@ -42,15 +26,14 @@ namespace QuestSystemLUA
                 {PacketTypes.ItemDrop, HandleDropItem}
             };
         }
-
         public static bool HandlerGetData(PacketTypes type, TSPlayer player, MemoryStream data)
         {
-            QGetDataHandlerDelegate handler;
+            GetDataHandlerDelegate handler;
             if (GetDataHandlerDelegates.TryGetValue(type, out handler))
             {
                 try
                 {
-                    return handler(new QGetDataHandlerArgs(player, data));
+                    return handler(new GetDataHandlerArgs(player, data));
                 }
                 catch (Exception ex)
                 {
@@ -59,8 +42,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        public static bool OnNpcStrike(QGetDataHandlerArgs args)
+        private static bool OnNpcStrike(GetDataHandlerArgs args)
         {
             short npcid = args.Data.ReadInt16();
             int damage = args.Data.ReadByte();
@@ -73,8 +55,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        private static bool HandleTile(QGetDataHandlerArgs args)
+        private static bool HandleTile(GetDataHandlerArgs args)
         {
             byte type = args.Data.ReadInt8();
             int x = args.Data.ReadInt32();
@@ -98,8 +79,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        private static bool HandleTileKill(QGetDataHandlerArgs args)
+        private static bool HandleTileKill(GetDataHandlerArgs args)
         {
             int x = args.Data.ReadInt32();
             int y = args.Data.ReadInt32();
@@ -121,8 +101,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        private static bool HandleSendTileSquare(QGetDataHandlerArgs args)
+        private static bool HandleSendTileSquare(GetDataHandlerArgs args)
         {
             short size = args.Data.ReadInt16();
             int x = args.Data.ReadInt32();
@@ -137,8 +116,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        private static bool HandleLiquidSet(QGetDataHandlerArgs args)
+        private static bool HandleLiquidSet(GetDataHandlerArgs args)
         {
             int x = args.Data.ReadInt32();
             int y = args.Data.ReadInt32();
@@ -152,8 +130,7 @@ namespace QuestSystemLUA
             }
             return false;
         }
-
-        private static bool HandleDropItem(QGetDataHandlerArgs args)
+        private static bool HandleDropItem(GetDataHandlerArgs args)
         {
             var player = QTools.GetPlayerByID(args.Player.Index);
             var reader = new BinaryReader(args.Data);
@@ -216,6 +193,11 @@ namespace QuestSystemLUA
                     }
                 }
             }
+
+            return false;
+        }
+        private static bool OnKillMe(GetDataHandlerArgs args)
+        {
 
             return false;
         }

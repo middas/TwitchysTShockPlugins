@@ -17,12 +17,8 @@ namespace QuestSystemLUA
             Lua lua = new Lua();
             QFunctions functions = new QFunctions();
 
-            lua.RegisterFunction("GotoXY", functions, functions.GetType().GetMethod("GotoXY")); //int x, int y, QPlayer Player
-            lua.RegisterFunction("Give", functions, functions.GetType().GetMethod("Give")); //string name, QPlayer Player
-            lua.RegisterFunction("Private", functions, functions.GetType().GetMethod("Private")); //string message, QPlayer Player
-            lua.RegisterFunction("Broadcast", functions, functions.GetType().GetMethod("Broadcast")); //string message
-            lua.RegisterFunction("SpawnMob", functions, functions.GetType().GetMethod("SpawnMob")); //string name, int x, int y
-            lua.RegisterFunction("Kill", functions, functions.GetType().GetMethod("Kill")); //string name, QPlayer Player
+            //Updated In 1.1
+            lua.RegisterFunction("AtXY", functions, functions.GetType().GetMethod("AtXY")); //int x, int y, QPlayer Player
             lua.RegisterFunction("TileEdit", functions, functions.GetType().GetMethod("TileEdit")); //int x, int y, string tile
             lua.RegisterFunction("WallEdit", functions, functions.GetType().GetMethod("WallEdit")); //int x, int y, string wall
             lua.RegisterFunction("DeleteBoth", functions, functions.GetType().GetMethod("DeleteBoth")); //int x, int y
@@ -32,40 +28,61 @@ namespace QuestSystemLUA
             lua.RegisterFunction("Teleport", functions, functions.GetType().GetMethod("Teleport")); //int x, int y, QPlayer Player
             lua.RegisterFunction("ClearKillList", functions, functions.GetType().GetMethod("ClearKillList")); //QPlayer Player
             lua.RegisterFunction("GoCollectItem", functions, functions.GetType().GetMethod("GoCollectItem")); //string itemname, int amount, QPlayer Player
-            lua.RegisterFunction("TakeItem", functions, functions.GetType().GetMethod("TakeItem")); //string questname, string itemname, int amount, QPlayer Player
-            lua.RegisterFunction("PopUpSign", functions, functions.GetType().GetMethod("PopUpSign")); //string text, QPlayer Player
+            lua.RegisterFunction("TakeItem", functions, functions.GetType().GetMethod("TakeItem")); //string qname, string iname, int amt, QPlayer Player
+            lua.RegisterFunction("GetRegionTilePercentage", functions, functions.GetType().GetMethod("GetRegionTilePercentage")); //string tiletype, string regionname
+            lua.RegisterFunction("GetXYTilePercentage", functions, functions.GetType().GetMethod("GetXYTilePercentage")); //string tiletype, int X, int Y, int Width, int Height
+            lua.RegisterFunction("GetRegionWallPercentage", functions, functions.GetType().GetMethod("GetRegionWallPercentage")); //string walltype, string regionname
+            lua.RegisterFunction("GetXYWallPercentage", functions, functions.GetType().GetMethod("GetXYWallPercentage"));//string walltype, int X, int Y, int Width, int Height
+            //Updated In 1.2
+            lua.RegisterFunction("Give", functions, functions.GetType().GetMethod("Give")); //string name, QPlayer Player
+            lua.RegisterFunction("Kill", functions, functions.GetType().GetMethod("Kill")); //string name, QPlayer Player, int amount = 1
+            lua.RegisterFunction("KillNpc", functions, functions.GetType().GetMethod("KillNpc")); //int id
+            lua.RegisterFunction("StartQuest", functions, functions.GetType().GetMethod("StartQuest")); //string qname, QPlayer Player
+            lua.RegisterFunction("ReadNextChatLine", functions, functions.GetType().GetMethod("ReadNextChatLine")); //QPlayer Player, bool hide = false
+            lua.RegisterFunction("SetNPCHealth", functions, functions.GetType().GetMethod("SetNPCHealth")); //int id, int health
+            lua.RegisterFunction("Private", functions, functions.GetType().GetMethod("Private")); //string message, QPlayer Player, Color color
+            lua.RegisterFunction("Broadcast", functions, functions.GetType().GetMethod("Broadcast")); //string message, Color color
+            lua.RegisterFunction("SpawnMob", functions, functions.GetType().GetMethod("SpawnMob")); //string name, int x, int y, int amount = 1
 
             var parameters = (RunQuestParameters)RunQuestOb;
-
+            QuestPlayerData qdata = null;
+            if ((qdata = GetPlayerQuestData(parameters.Quest.Name, parameters.Player)) != null)
+                qdata.Attempts++;
+            else
+            {
+                qdata = new QuestPlayerData(parameters.Quest.Name, false, 0);
+                parameters.Player.MyDBPlayer.QuestPlayerData.Add(qdata);
+                qdata.Attempts++;
+            }
+            parameters.Player.RunningQuests.Add(parameters.Quest.Name);
+            object[] returnvalues = new object[1];
             try
             {
-                QuestPlayerData qdata = null;
-
-                if ((qdata = GetPlayerQuestData(parameters.Quest.Name, parameters.Player)) != null)
-                    IncreaseQuestAttemptCount(qdata);
-                else
-                {
-                    qdata = new QuestPlayerData(parameters.Quest.Name, false, 0);
-                    parameters.Player.MyDBPlayer.QuestPlayerData.Add(qdata);
-                    IncreaseQuestAttemptCount(qdata);
-                }
-
-                parameters.Player.RunningQuests.Add(parameters.Quest.Name);
-
                 lua["Player"] = parameters.Player;
-
-                object[] returnvalues = new object[1];
-
+                lua["Name"] = parameters.Player.TSPlayer.Name;
+                lua["QName"] = parameters.Quest.Name;
+                lua["Color"] = new Color();
                 returnvalues = lua.DoFile(parameters.Quest.FilePath);
 
-                if (returnvalues == null || (bool)returnvalues[0])
-                    CompleteQuest(qdata);
-
+                if (returnvalues == null || returnvalues[0] == null || (bool)returnvalues[0])
+                    qdata.Complete = true;
                 UpdateStoredPlayersInDB();
-
                 parameters.Player.RunningQuests.Remove(parameters.Quest.Name);
+                parameters.Player.RunningQuestThreads.Remove(parameters);
             }
-            catch (Exception e) { Log.Error(e.Message); parameters.Player.RunningQuests.Remove(parameters.Quest.Name); }
+            catch (LuaException e)
+            {
+                Log.Error(e.Message);
+                parameters.Player.RunningQuests.Remove(parameters.Quest.Name);
+                parameters.Player.RunningQuestThreads.Remove(parameters);
+                UpdateStoredPlayersInDB();
+            }
+            catch
+            {
+                parameters.Player.RunningQuests.Remove(parameters.Quest.Name);
+                parameters.Player.RunningQuestThreads.Remove(parameters);
+                UpdateStoredPlayersInDB();
+            }
         }
         public static QPlayer GetPlayerByID(int id)
         {
@@ -76,6 +93,19 @@ namespace QuestSystemLUA
                     return ply;
             }
             return player;
+        }
+        public static QPlayer GetPlayerByName(string name)
+        {
+            var player = Tools.FindPlayer(name)[0];
+            if (player != null)
+            {
+                foreach (QPlayer ply in QMain.Players)
+                {
+                    if (ply.TSPlayer == player)
+                        return ply;
+                }
+            }
+            return null;
         }
         public static Quest GetQuestByName(string name)
         {
@@ -205,14 +235,6 @@ namespace QuestSystemLUA
                 QMain.SQLEditor.InsertValues("QuestRegions", values);
             }
         }
-        public static void IncreaseQuestAttemptCount(QuestPlayerData qdata)
-        {
-            qdata.Attempts++;
-        }
-        public static void CompleteQuest(QuestPlayerData qdata)
-        {
-            qdata.Complete = true;
-        }
         public static QuestPlayerData GetPlayerQuestData(string name, QPlayer Player)
         {
             foreach (QuestPlayerData data in Player.MyDBPlayer.QuestPlayerData)
@@ -248,80 +270,79 @@ namespace QuestSystemLUA
             QMain.QuestPool = new List<Quest>();
             QMain.QuestRegions = new List<QuestRegion>();
             QMain.StoredPlayers = new List<StoredQPlayer>();
-
             if (!Directory.Exists("Quests"))
                 Directory.CreateDirectory("Quests");
-
             string[] filePaths = Directory.GetFiles("Quests", "*.lua");
-
             foreach (string path in filePaths)
             {
-                string[] configfile = File.ReadAllLines(path.Split('.')[0] + ".cfg");
-
-                string Name = "";
-                int MaxAttempts = 0;
-                int MinQuestsNeeded = 0;
-                int AmountOfPlayersAtATime = 0;
-
-                foreach (string line in configfile)
+                try
                 {
-                    if (line.StartsWith("Name"))
-                        Name = line.Split(':')[1];
-                    if (line.StartsWith("MaxAttempts"))
-                        MaxAttempts = Int32.Parse(line.Split(':')[1]);
-                    if (line.StartsWith("MinQuestsNeeded"))
-                        MinQuestsNeeded = Int32.Parse(line.Split(':')[1]);
-                    if (line.StartsWith("AmountOfPlayersAtATime"))
-                        AmountOfPlayersAtATime = Int32.Parse(line.Split(':')[1]);
+                    string[] configfile = File.ReadAllLines(path.Split('.')[0] + ".cfg");
+                    string Name = "";
+                    int MaxAttempts = 0;
+                    int MinQuestsNeeded = 0;
+                    int AmountOfPlayersAtATime = 0;
+                    bool endondeath = false;
+                    foreach (string line in configfile)
+                    {
+                        if (line.Trim().StartsWith("Name"))
+                            Name = line.Trim().Split(':')[1];
+                        if (line.Trim().StartsWith("MaxAttempts"))
+                            MaxAttempts = Int32.Parse(line.Trim().Split(':')[1]);
+                        if (line.Trim().StartsWith("MinQuestsNeeded"))
+                            MinQuestsNeeded = Int32.Parse(line.Trim().Split(':')[1]);
+                        if (line.Trim().StartsWith("AmountOfPlayersAtATime"))
+                            AmountOfPlayersAtATime = Int32.Parse(line.Trim().Split(':')[1]);
+                        if (line.Trim().StartsWith("EndOnDeath"))
+                            endondeath = bool.Parse(line.Trim().Split(':')[1]);
+                    }
+                    QMain.QuestPool.Add(new Quest(Name, path, MinQuestsNeeded, MaxAttempts, AmountOfPlayersAtATime, endondeath));
                 }
-
-                QMain.QuestPool.Add(new Quest(Name, path, MinQuestsNeeded, MaxAttempts, AmountOfPlayersAtATime));
+                catch { }
             }
-
             for (int i = 0; i < QMain.SQLEditor.ReadColumn("QuestPlayers", "LogInName", new List<SqlValue>()).Count; i++)
             {
                 string qname = QMain.SQLEditor.ReadColumn("QuestPlayers", "LogInName", new List<SqlValue>())[i].ToString();
                 string questdata = QMain.SQLEditor.ReadColumn("QuestPlayers", "QuestPlayerData", new List<SqlValue>())[i].ToString();
-
                 List<QuestPlayerData> playerdata = new List<QuestPlayerData>();
-
                 foreach (string data in questdata.Split(':'))
                 {
-                    if (data != "")
+                    try
                     {
-                        string name = data.Split(',')[0];
-                        bool complete = bool.Parse(data.Split(',')[1]);
-                        int attempts = int.Parse(data.Split(',')[2]);
-
-                        playerdata.Add(new QuestPlayerData(name, complete, attempts));
+                        if (data != "")
+                        {
+                            string name = data.Split(',')[0];
+                            bool complete = bool.Parse(data.Split(',')[1]);
+                            int attempts = int.Parse(data.Split(',')[2]);
+                            playerdata.Add(new QuestPlayerData(name, complete, attempts));
+                        }
                     }
+                    catch { }
                 }
-
                 QMain.StoredPlayers.Add(new StoredQPlayer(qname, playerdata));
             }
-
             for (int i = 0; i < QMain.SQLEditor.ReadColumn("QuestRegions", "RegionName", new List<SqlValue>()).Count; i++)
             {
-                string name = QMain.SQLEditor.ReadColumn("QuestRegions", "RegionName", new List<SqlValue>())[i].ToString();
-                int X1 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "X1", new List<SqlValue>())[i].ToString());
-                int Y1 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "Y1", new List<SqlValue>())[i].ToString());
-                int X2 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "X2", new List<SqlValue>())[i].ToString());
-                int Y2 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "Y2", new List<SqlValue>())[i].ToString());
-                string Quests = QMain.SQLEditor.ReadColumn("QuestRegions", "Quests", new List<SqlValue>())[i].ToString();
-                string Entry = QMain.SQLEditor.ReadColumn("QuestRegions", "EntryMessage", new List<SqlValue>())[i].ToString();
-                string Exit = QMain.SQLEditor.ReadColumn("QuestRegions", "ExitMessage", new List<SqlValue>())[i].ToString();
-
-                List<Quest> quests = new List<Quest>();
-
-                foreach (string quest in Quests.Split(','))
+                try
                 {
-                    Quest q = QTools.GetQuestByName(quest);
-
-                    if (q != null)
-                        quests.Add(q);
+                    string name = QMain.SQLEditor.ReadColumn("QuestRegions", "RegionName", new List<SqlValue>())[i].ToString();
+                    int X1 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "X1", new List<SqlValue>())[i].ToString());
+                    int Y1 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "Y1", new List<SqlValue>())[i].ToString());
+                    int X2 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "X2", new List<SqlValue>())[i].ToString());
+                    int Y2 = int.Parse(QMain.SQLEditor.ReadColumn("QuestRegions", "Y2", new List<SqlValue>())[i].ToString());
+                    string Quests = QMain.SQLEditor.ReadColumn("QuestRegions", "Quests", new List<SqlValue>())[i].ToString();
+                    string Entry = QMain.SQLEditor.ReadColumn("QuestRegions", "EntryMessage", new List<SqlValue>())[i].ToString();
+                    string Exit = QMain.SQLEditor.ReadColumn("QuestRegions", "ExitMessage", new List<SqlValue>())[i].ToString();
+                    List<Quest> quests = new List<Quest>();
+                    foreach (string quest in Quests.Split(','))
+                    {
+                        Quest q = QTools.GetQuestByName(quest);
+                        if (q != null)
+                            quests.Add(q);
+                    }
+                    QMain.QuestRegions.Add(new QuestRegion(name, quests, X1, Y1, X2, Y2, Entry, Exit));
                 }
-
-                QMain.QuestRegions.Add(new QuestRegion(name, quests, X1, Y1, X2, Y2, Entry, Exit));
+                catch { }
             }
         }
         public static bool AbleToRunQuest(Quest q)
@@ -336,6 +357,19 @@ namespace QuestSystemLUA
                 }
             }
             return count == 0 || count < q.AmountOfPlayersAtATime;
+        }
+        public static RunQuestParameters GetRunningQuestByName(string playername, string questname)
+        {
+            QPlayer p;
+            if ((p = GetPlayerByName(playername)) != null)
+            {
+                foreach (RunQuestParameters qp in p.RunningQuestThreads)
+                {
+                    if (qp.Quest.Name == questname)
+                        return qp;
+                }
+            }
+            return null;
         }
     }
 }
