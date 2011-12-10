@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace PluginTemplate
 {
-    [APIVersion(1, 8)]
+    [APIVersion(1, 9)]
     public class PluginTemplate : TerrariaPlugin
     {
         public override string Name
@@ -20,7 +20,7 @@ namespace PluginTemplate
 
         public override string Author
         {
-            get { return "Created by Twitchy"; }
+            get { return "Created by Twitchy."; }
         }
 
         public override string Description
@@ -109,7 +109,7 @@ namespace PluginTemplate
                     text = text + word + " ";
                 }
 
-                Tools.Broadcast("<Server>: " + text, Color.Yellow);
+                TShock.Utils.Broadcast("<Server>: " + text, Color.Yellow);
             }
         }
     }

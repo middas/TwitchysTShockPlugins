@@ -96,7 +96,7 @@ namespace QuestSystemLUA
         }
         public static QPlayer GetPlayerByName(string name)
         {
-            var player = Tools.FindPlayer(name)[0];
+            var player = TShock.Utils.FindPlayer(name)[0];
             if (player != null)
             {
                 foreach (QPlayer ply in QMain.Players)

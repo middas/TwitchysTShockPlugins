@@ -238,7 +238,7 @@ namespace QuestSystemLUA
         public static void Give(string name, QPlayer Player, int amount = 1)
         {
             Main.rand = new Random();
-            Item item = Tools.GetItemByName(name)[0];
+            Item item = TShock.Utils.GetItemByName(name)[0];
             Player.TSPlayer.GiveItem(item.type, item.name, item.width, item.height, amount);
         } //In Wiki
         public static void Private(string message, QPlayer Player, Color color)
@@ -247,7 +247,7 @@ namespace QuestSystemLUA
         } //In Wiki
         public static void Broadcast(string message, Color color)
         {
-            Tools.Broadcast(message, color);
+            TShock.Utils.Broadcast(message, color);
         } //In Wiki
         public static void StartQuest(string qname, QPlayer Player)
         {
@@ -280,13 +280,13 @@ namespace QuestSystemLUA
         public static List<int> SpawnMob(string name, int x, int y, int amount = 1)
         {
             List<int> Ids = new List<int>();
-            NPC npc = Tools.GetNPCByName(name)[0];
+            NPC npc = TShock.Utils.GetNPCByName(name)[0];
             for (int i = 0; i < amount; i++)
             {
                 int npcid;
                 int spawnTileX;
                 int spawnTileY;
-                Tools.GetRandomClearTileWithInRange(x, y, 1, 1, out spawnTileX, out spawnTileY);
+                TShock.Utils.GetRandomClearTileWithInRange(x, y, 1, 1, out spawnTileX, out spawnTileY);
                 npcid = QNPC.NewNPC(spawnTileX * 16, spawnTileY * 16, npc.type, 0);
                 Main.npc[npcid].SetDefaults(npc.name);
                 Main.npc[npcid].UpdateNPC(npcid);

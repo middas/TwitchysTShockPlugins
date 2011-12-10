@@ -443,8 +443,8 @@ namespace C3Mod.GameTypes
                 }
             }
 
-            Item heart = Tools.GetItemById(58);
-            Item star = Tools.GetItemById(184);
+            Item heart = TShock.Utils.GetItemById(58);
+            Item star = TShock.Utils.GetItemById(184);
 
             foreach (C3Player player in C3Mod.C3Players)
             {
