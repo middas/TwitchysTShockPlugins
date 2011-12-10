@@ -13,7 +13,7 @@ using System.IO;
 
 namespace QuestSystemLUA
 {
-    [APIVersion(1, 8)]
+    [APIVersion(1, 9)]
     public class QMain : TerrariaPlugin
     {        
         public override string Name
@@ -22,7 +22,7 @@ namespace QuestSystemLUA
         }
         public override string Author
         {
-            get { return "Created by Twitchy"; }
+            get { return "Created by Twitchy."; }
         }
         public override string Description
         {

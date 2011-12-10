@@ -129,8 +129,8 @@ namespace C3Mod.GameTypes
                                         DuelRunning = false;
                                         DuelCountdown = true;
 
-                                        Item heart = Tools.GetItemById(58);
-                                        Item star = Tools.GetItemById(184);
+                                        Item heart = TShock.Utils.GetItemById(58);
+                                        Item star = TShock.Utils.GetItemById(184);
                                         foreach (C3Player players in C3Mod.C3Players)
                                         {
                                             if (players.GameType == "1v1")
@@ -152,8 +152,8 @@ namespace C3Mod.GameTypes
                                         DuelRunning = false;
                                         DuelCountdown = true;
 
-                                        Item heart = Tools.GetItemById(58);
-                                        Item star = Tools.GetItemById(184);
+                                        Item heart = TShock.Utils.GetItemById(58);
+                                        Item star = TShock.Utils.GetItemById(184);
 
                                         foreach (C3Player players in C3Mod.C3Players)
                                         {

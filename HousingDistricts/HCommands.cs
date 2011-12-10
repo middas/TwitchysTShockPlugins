@@ -240,13 +240,13 @@ namespace HousingDistricts
 
                 if (args.Player.Group.HasPermission("adminchat") && !text.StartsWith("/") && TShock.Config.AdminChatEnabled)
                 {
-                    Tools.Broadcast(TShock.Config.AdminChatPrefix + "<" + args.Player.Name + ">" + text,
+                    TShock.Utils.Broadcast(TShock.Config.AdminChatPrefix + "<" + args.Player.Name + ">" + text,
                                     args.Player.Group.R, args.Player.Group.G,
                                     args.Player.Group.B);
                     return;
                 }
 
-                Tools.Broadcast("{2}<{0}>{1}".SFormat(args.Player.Name, text, TShock.Config.ChatDisplayGroup ? "[{0}] ".SFormat(args.Player.Group.Name) : ""),
+                TShock.Utils.Broadcast("{2}<{0}>{1}".SFormat(args.Player.Name, text, TShock.Config.ChatDisplayGroup ? "[{0}] ".SFormat(args.Player.Group.Name) : ""),
                                 args.Player.Group.R, args.Player.Group.G,
                                 args.Player.Group.B);
             }
