@@ -20,11 +20,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\C3Mod\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputPath>..\Bin\Release\</OutputPath>
+    <OutputPath>..\Bin\Release\C3Mod\</OutputPath>
     <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
@@ -46,32 +46,44 @@
   <ItemGroup>
     <Reference Include="Community.CsharpSqlite">
       <HintPath>..\Refs\Community.CsharpSqlite.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Community.CsharpSqlite.SQLiteClient">
       <HintPath>..\Refs\Community.CsharpSqlite.SQLiteClient.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="HttpServer">
       <HintPath>..\Refs\HttpServer.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MySql.Data">
       <HintPath>..\Refs\MySql.Data.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MySql.Web">
       <HintPath>..\Refs\MySql.Web.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Refs\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
     <Reference Include="TerrariaServer">
       <HintPath>..\Refs\TerrariaServer.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="TShockAPI">
       <HintPath>..\Refs\TShockAPI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
