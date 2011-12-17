@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace ChatBlocker
 {
-    [APIVersion(1, 9)]
+    [APIVersion(1, 10)]
     public class PluginTemplate : TerrariaPlugin
     {
         public static CConfigFile CConfig { get; set; }

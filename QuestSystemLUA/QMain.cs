@@ -13,7 +13,7 @@ using System.IO;
 
 namespace QuestSystemLUA
 {
-    [APIVersion(1, 9)]
+    [APIVersion(1, 10)]
     public class QMain : TerrariaPlugin
     {        
         public override string Name
